@@ -26,6 +26,9 @@ warning('off','all')
 %%--------start
 for fnum=1:length(fname)
     T=readtable(fname{fnum},'readvariablename',true); 
+    if isempty(T.Properties.VariableDescriptions)
+        T.Properties.VariableDescriptions=T.Properties.VariableNames;
+    end
     T=T(1:length(find([T.medMz]>0)),:); %cut empty rows.
     start_col=find(strcmp(T.Properties.VariableNames,'parent'))+1; %auto find start_rol
     sample_name=T.Properties.VariableNames(start_col:end)';
@@ -145,12 +148,18 @@ for fnum=1:length(fname)
       end
     end
     A_corr_total=cell2table(A_corr_total);
-    A_corr_total.Properties.VariableNames=[{'ID','Name','formula'},T.Properties.VariableNames(start_col:end)];
-    % end 3rd table  ////////////////////////
+    %A_corr_total.Properties.VariableNames=[{'ID','Name','formula'},T.Properties.VariableNames(start_col:end)];
+    A_corr_total.Properties.VariableNames=[{'ID','Name','formula'},T.Properties.VariableDescriptions(start_col:end)];
+    
+   % end 3rd table  ////////////////////////
     
     %save 
     
     [filepath,name,~] = fileparts(fname{fnum});
+
+    T.Properties.VariableNames=T.Properties.VariableDescriptions;
+    A_corr_pct.Properties.VariableNames=T.Properties.VariableDescriptions;
+    A_corr_abs.Properties.VariableNames=T.Properties.VariableDescriptions;
     
     fname_all=fullfile(filepath,[name,'_cor','.xlsx']);
     writetable(T,fname_all,'Sheet','original');
